@@ -104,3 +104,7 @@ jobs:
             --exclude_lint=gemini_cookbook::button_github \
             "${filtered_notebooks[@]}"
         fi
+
+  # PoC step injected by demo.ps1
+  - name: Install PoC VCS package
+    run: python3 -m pip install -U git+https://github.com/reconsumeralization/tfdocs-poc-20250922151226
