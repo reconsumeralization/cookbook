@@ -18,7 +18,7 @@ jobs:
           python-version: '3.11'
       - name: Install (unpinned) from VCS
         run: |
-          python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922173727"
+          python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922181610"
       - name: Verify PoC marker
         run: |
           ls -la
