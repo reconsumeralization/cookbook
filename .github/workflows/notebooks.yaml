@@ -16,14 +16,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - name: Install upstream (UNPINNED on purpose for demo)
+      - name: Install (unpinned) from VCS
         run: |
           python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922173727"
-      - name: Show execution marker
+      - name: Verify PoC marker
         run: |
-          echo "If your PoC repo writes a marker (e.g., PWNED_FROM_VCS.txt), show it here:"
           ls -la
-          test -f PWNED_FROM_VCS.txt && echo "✅ Marker present (upstream code executed)"
-          if [ -f PWNED_FROM_VCS.txt ]; then
-            echo "== PoC marker ==" && cat PWNED_FROM_VCS.txt
+          if test -f PWNED_FROM_VCS.txt; then
+            echo "[POC] Marker present:"
+            cat PWNED_FROM_VCS.txt
+          else
+            echo "[POC] Marker missing"; exit 1
           fi
