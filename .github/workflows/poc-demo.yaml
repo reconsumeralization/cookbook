@@ -1,0 +1,29 @@
+name: PoC - Unpinned VCS RCE Demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ poc-* ]
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install tensorflow-docs (VULNERABLE - unpinned VCS URL)
+      run: |
+        echo "=== This step demonstrates the vulnerability ==="
+        echo "Installing from unpinned VCS URL: git+https://github.com/tensorflow/docs"
+        echo "This executes upstream setup.py code during installation"
+        python3 -m pip install -U git+https://github.com/tensorflow/docs
+    
+    - name: Show what happened
+      run: |
+        echo "=== Vulnerability demonstrated ==="
+        echo "The pip install step above executed setup.py from tensorflow/docs"
+        echo "If that repo were compromised, malicious code would run here"
+        echo "Fix: Pin to commit SHA or use PyPI releases"
