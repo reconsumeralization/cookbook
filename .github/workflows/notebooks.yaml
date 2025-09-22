@@ -16,12 +16,21 @@ on:
         required: false
         default: checks
         options: [checks, poc]
+    inputs:
+      mode:
+        description: "Run notebook checks or PoC demo"
+        type: choice
+        required: false
+        default: checks
+        options: [checks, poc]
 
 jobs:
-$pocJob$pocJob  # Format all notebooks.
+$pocJob$pocJob$pocJob  # Format all notebooks.
   nbfmt:
     name: Notebook format
     runs-on: ubuntu-latest
+    # Skip in PoC mode for clean recording
+    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
     # Skip in PoC mode for clean recording
     if: github.event_name == 'pull_request' || inputs.mode == 'checks'
     # Don't run notebooks on the PoC branch so the run stays green
@@ -31,6 +40,8 @@ $pocJob$pocJob  # Format all notebooks.
       with:
         fetch-depth: 0  # Get *full* history
     - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
       with:
         python-version: '3.11'
       with:
@@ -62,6 +73,8 @@ $pocJob$pocJob  # Format all notebooks.
     runs-on: ubuntu-latest
     # Skip in PoC mode for clean recording
     if: github.event_name == 'pull_request' || inputs.mode == 'checks'
+    # Skip in PoC mode for clean recording
+    if: github.event_name == 'pull_request' || inputs.mode == 'checks'
     # Don't run notebooks on the PoC branch so the run stays green
     if: startsWith(github.ref, 'refs/heads/poc-unpinned-vcs-rce-') == false
     steps:
@@ -69,6 +82,8 @@ $pocJob$pocJob  # Format all notebooks.
       with:
         fetch-depth: 0  # Get *full* history
     - uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
       with:
         python-version: '3.11'
       with:
